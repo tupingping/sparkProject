@@ -42,9 +42,7 @@ public class JdbcHelper {
 			
 		} catch (Exception e) {
 			// TODO: handle exception
-		}
-		
-		
+		}		
 	}
 	
 	/**
@@ -177,7 +175,11 @@ public class JdbcHelper {
 			connection.commit();
 			
 		} catch (Exception e) {
-			
+			e.printStackTrace();
+		}finally {
+			if(connection != null){
+				datasource.push(connection);
+			}
 		}
 				
 		return rst;
