@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Task implements Serializable{
 	
+	private static final long serialVersionUID = 7579167594631294614L;
+	
 	private long taskId;
 	private String taskName;
 	private String createTime;

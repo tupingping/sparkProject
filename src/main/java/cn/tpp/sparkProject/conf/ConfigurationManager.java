@@ -3,6 +3,8 @@ package cn.tpp.sparkProject.conf;
 import java.io.InputStream;
 import java.util.Properties;
 
+import scala.xml.dtd.PublicID;
+
 public class ConfigurationManager {
 	private static Properties prop = new Properties();
 	
@@ -29,5 +31,15 @@ public class ConfigurationManager {
 			e.printStackTrace();
 		}
 		return 0;
+	}
+	
+	public static Boolean getBoolean(String key){
+		String value = getProperty(key);
+		try {
+			return Boolean.valueOf(value);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
