@@ -46,14 +46,21 @@ public class UserVisitSessionAnalylizeSpark {
 		JSONObject params = JSONObject.parseObject(task.getTaskParam()); 
 		JavaRDD<Row> rdd = getActionRddByDateRange(sqlContext,params);
 		
+		System.out.println(rdd.count());
+		
 		JavaPairRDD<String, String> infoRdd = aggregateByUserid(rdd,sqlContext);
 		
 		System.out.println(infoRdd.count());
-		for(Tuple2<String, String> tuple2 : infoRdd.take(10)){
+		for(Tuple2<String, String> tuple2 : infoRdd.take(10)){ 
 			System.out.println(tuple2._2);
 		}
 		
 		JavaPairRDD<String, String> filterRdd = filterSession(infoRdd,params);
+		
+		System.out.println(filterRdd.count());
+		for(Tuple2<String, String> tuple2 : filterRdd.take(10)){
+			System.out.println(tuple2._1+":"+tuple2._2);
+		}
 		
 		jsc.close();
  	}
@@ -77,7 +84,10 @@ public class UserVisitSessionAnalylizeSpark {
 		String startDate = ParamUtils.getParam(param, Constants.PARAM_START_DATE);
 		String endDate = ParamUtils.getParam(param, Constants.PARAM_END_DATE);
 		
-		String sql="select * from user_visit_action where date>= '"+startDate+"' and "+"date<= '"+endDate+"'";
+		String sql="select * "
+				+ "from user_visit_action "
+				+ "where date>='" + startDate + "' "
+				+ "and date<='" + endDate + "'";
 		DataFrame dFrame = sc.sql(sql);
 		return dFrame.javaRDD();		
 	}
@@ -170,7 +180,7 @@ public class UserVisitSessionAnalylizeSpark {
 				
 				String fullAgrrInfo = partAggrInfo +"|"
 						+ Constants.FIELD_AGE + "="+ age+"|"
-						+Constants.FIELD_PROFESSIONAL+"="+professional
+						+Constants.FIELD_PROFESSIONAL+"="+professional+"|"
 						+Constants.FIELD_CITY+"="+city+"|"
 						+Constants.FIELD_SEX+"="+sex;
 				
@@ -192,12 +202,12 @@ public class UserVisitSessionAnalylizeSpark {
 		String keyword = ParamUtils.getParam(param, Constants.PARAM_KEYWORDS);
 		String categoryids = ParamUtils.getParam(param, Constants.PARAM_CATEGORY_IDS);
 		
-		String _paramter = (startAge != null ? (Constants.PARAM_START_AGE+"="+startAge+"\\|"):"")
-				+ (endAge != null ? (Constants.PARAM_END_AGE+"="+endAge+"\\|"):"")
-				+ (professionals != null ? (Constants.PARAM_PROFESSIONALS+"="+professionals+"\\|"):"")
-				+ (city != null ? (Constants.PARAM_CITIES+"="+city+"\\|"):"")
-				+ (sex != null ? (Constants.PARAM_SEX+"="+sex+"\\|"):"")
-				+ (keyword != null ? (Constants.PARAM_KEYWORDS+"="+keyword+"\\|"):"")
+		String _paramter = (startAge != null ? (Constants.PARAM_START_AGE+"="+startAge+"|"):"")
+				+ (endAge != null ? (Constants.PARAM_END_AGE+"="+endAge+"|"):"")
+				+ (professionals != null ? (Constants.PARAM_PROFESSIONALS+"="+professionals+"|"):"")
+				+ (city != null ? (Constants.PARAM_CITIES+"="+city+"|"):"")
+				+ (sex != null ? (Constants.PARAM_SEX+"="+sex+"|"):"")
+				+ (keyword != null ? (Constants.PARAM_KEYWORDS+"="+keyword+"|"):"")
 				+ (categoryids != null ? (Constants.PARAM_CATEGORY_IDS+"="+categoryids):"");
 		
 		if(_paramter.endsWith("\\|")){
