@@ -3,16 +3,11 @@ package cn.tpp.sparkProject.spark;
 import org.apache.spark.AccumulatorParam;
 
 import cn.tpp.sparkProject.constant.Constants;
+import cn.tpp.sparkProject.util.StringUtils;
 
 public class SessionAggrStatAccumulator implements AccumulatorParam<String>{
 
 	private static final long serialVersionUID = 6215189869403431982L;
-
-	@Override
-	public String addInPlace(String arg0, String arg1) {
-		// TODO 自动生成的方法存根
-		return null;
-	}
 
 	@Override
 	public String zero(String arg0) {
@@ -36,10 +31,30 @@ public class SessionAggrStatAccumulator implements AccumulatorParam<String>{
 	}
 
 	@Override
+	public String addInPlace(String arg0, String arg1) {
+		return add(arg0,arg1);
+	}
+	
+	@Override
 	public String addAccumulator(String arg0, String arg1) {
-		// TODO 自动生成的方法存根
-		return null;
+		return add(arg0,arg1);
 	}
 
-	
+	private String add(String arg0, String arg1){
+		// 校验：v1为空的话，直接返回v2
+		if(StringUtils.isEmpty(arg0)) {
+			return arg1;
+		}
+		
+		// 使用StringUtils工具类，从v1中，提取v2对应的值，并累加1
+		String oldValue = StringUtils.getFieldFromConcatString(arg0, "\\|", arg1);
+		if(oldValue != null) {
+			// 将范围区间原有的值，累加1
+			int newValue = Integer.valueOf(oldValue) + 1;
+			// 使用StringUtils工具类，将v1中，v2对应的值，设置成新的累加后的值
+			return StringUtils.setFieldInConcatString(arg0, "\\|", arg1, String.valueOf(newValue));  
+		}
+		
+		return arg0;
+	}
 }
