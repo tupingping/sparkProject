@@ -15,6 +15,7 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.hive.HiveContext;
+import org.datanucleus.store.rdbms.mapping.StatementMappingIndex;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -226,7 +227,6 @@ public class UserVisitSessionAnalylizeSpark {
 		return fullInfoRDD;
 	}
 	
-
 	private static JavaPairRDD<String, String> filterSession(JavaPairRDD<String, String> session2AggrRDD,
 			final JSONObject param,final Accumulator<String> sessionAggrStatAccumulator){
 		
@@ -378,6 +378,7 @@ public class UserVisitSessionAnalylizeSpark {
 		long visit_length_30m = Long.valueOf(StringUtils.getFieldFromConcatString(
 				value, "\\|", Constants.TIME_PERIOD_30m));
 		
+		  
 		long step_length_1_3 = Long.valueOf(StringUtils.getFieldFromConcatString(
 				value, "\\|", Constants.STEP_PERIOD_1_3));
 		long step_length_4_6 = Long.valueOf(StringUtils.getFieldFromConcatString(
@@ -447,5 +448,25 @@ public class UserVisitSessionAnalylizeSpark {
 		// 调用对应的DAO插入统计结果
 		ISessionAggrStatDAO sessionAggrStatDAO = DAOFactory.getSessionAggrStatDAO();
 		sessionAggrStatDAO.insert(sessionAggrStat);  
+	}
+
+	private static void getTop10Category(JavaPairRDD<String, String> filteredSession2AggrInfoRDD, JavaPairRDD<String, Row> session2actionRDD){
+		
+		JavaPairRDD<String, Row> session2detailRDD = filteredSession2AggrInfoRDD
+				.join(session2actionRDD)
+				.mapToPair(new PairFunction<Tuple2<String,Tuple2<String,Row>>, String, Row>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Tuple2<String, Row> call(Tuple2<String, Tuple2<String, Row>> t) throws Exception {
+						// TODO 自动生成的方法存根
+						
+						return new Tuple2<String, Row>(t._1, t._2._2);
+					}
+				});
+		
+		
+		
 	}
 }
